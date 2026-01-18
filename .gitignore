@@ -1,0 +1,5 @@
+stardew_env/
+.stardew_env/
+__pycache__/
+*.pyc
+.vscode/
