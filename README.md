@@ -1,4 +1,4 @@
-# My Junimo Assistent - AI tool to strategize farming in Stardew Valley
+# My Junimo Assistant - AI tool to strategize farming in Stardew Valley
 
 An AI assistent (Junimo) who will give you the best advice for what to work on for the day!
 
