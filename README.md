@@ -2,59 +2,69 @@
 
 An AI assistent (Junimo) who will give you the best advice for what to work on for the day!
 
-Implemented tools:
-
-- Download and parse game data
-- Scrape Stardew Valley Wiki knowledge in DB and semantic search
-
 ## Using multi-agents
 
 Agent Roles
 | Agent | Specialty | Core Goal |
 | ------ | ----| ----|
-| The Money Maker | Crops & Animals | Maximize profit per tile; ensure crops don't die on season change. |
+| The Money Maker | Crops & Animals & Fishing | Maximize profit |
 | The Socialite | NPC Relationships | Tracks birthdays and gift preferences; festival schedules |
-| The Scavenger | Tasks / Quests | Tracks Community Center bundles and active quest items |
-| The Foreman | Coordination | The "Boss" agent. Receives reports from the others and crafts the final schedule. |
+| The Scavenger | Tasks / Quests | Tracks Community Center bundles and active quests |
+| The Foreman | Coordination | The "Boss" agent. Receives reports from the others and crafts the final schedule using a priority system. |
 
 ### How to use
 
-Config your Gemini API key in gemini_api_config.json \
-In project root, run `python3 -m my_package.multi_agents.the_foreman`
+1. Recommend run in a virtual environment
+2. In your venv, run `pip install -e .`
+3. Config your Gemini API key, LangSmith key in a new `.env` file, see `.env.example`
+4. In project root, run `python3 -m my_package.multi_agents.the_foreman`
 
 ### Example output
 
 ```
--- Loading AI model config and game data
- ✈️  Load LLM model config: {'api_key': 'xxx', 'model': 'gemini-3-flash-preview'}
 -- Start reasoning
+🧠 Classifier: Analyzing request and routing...
   🚀 Using cached farm data...
-  🏡 Current Farm Status: {'farmer': 'Master Yi', 'money': 500, 'day': '1', 'season': 'spring', 'year': '1', 'dailyLuck': -0.093, 'weather': 'Sunny'}
-  📚 Found related Wiki context of length 749 in SV Wiki
-  📚 Found related Wiki context of length 783 in SV Wiki
+  🏡 Current Farm Status: {'farmer': 'Master Yi', 'money': 0, 'day': '2', 'season': 'spring', 'year': '1', 'dailyLuck': -0.07, 'weather': 'Sunny'}
+🏡 Farm Status: 0g, spring 2
+📋 Routing to: ['money_maker', 'socialite', 'scavenger']
+💭 Reasoning: The user is asking for a general daily plan, which requires input from all three specialists to cover crops/profit, social interactions, and collection progress.
+💰 Money Maker: Analyzing farm economics...
+👥 Socialite: Checking relationships and events...
+🔍 Scavenger: Searching for quests and bundles...
   🚀 Using cached farm data...
-  🏡 Current Farm Status: {'farmer': 'Master Yi', 'money': 500, 'day': '1', 'season': 'spring', 'year': '1', 'dailyLuck': -0.093, 'weather': 'Sunny'}
+  🏡 Current Farm Status: {'farmer': 'Master Yi', 'money': 0, 'day': '2', 'season': 'spring', 'year': '1', 'dailyLuck': -0.07, 'weather': 'Sunny'}
+  🚀 Using cached farm data...
+  🏡 Current Farm Status: {'farmer': 'Master Yi', 'money': 0, 'day': '2', 'season': 'spring', 'year': '1', 'dailyLuck': -0.07, 'weather': 'Sunny'}
+  🚀 Using cached farm data...
+  🏡 Current Farm Status: {'farmer': 'Master Yi', 'money': 0, 'day': '2', 'season': 'spring', 'year': '1', 'dailyLuck': -0.07, 'weather': 'Sunny'}
   📚 Found related Wiki context of length 1437 in SV Wiki
-  📚 Found related Wiki context of length 1210 in SV Wiki
-  📚 Found related Wiki context of length 632 in SV Wiki
-  📚 Found related Wiki context of length 621 in SV Wiki
-  📚 Found related Wiki context of length 434 in SV Wiki
-  📚 Found related Wiki context of length 998 in SV Wiki
-  📚 Found related Wiki context of length 587 in SV Wiki
+  📚 Found related Wiki context of length 783 in SV Wiki
   📚 Found related Wiki context of length 1205 in SV Wiki
-  📚 Found related Wiki context of length 587 in SV Wiki
-  📚 Found related Wiki context of length 555 in SV Wiki
+  📚 Found related Wiki context of length 632 in SV Wiki
+📊 Aggregating responses from specialists...
+✨ Synthesizing final strategy...
+🎯 Priority Context: low_money
+📊 Agent Priority Order: ['money_maker', 'scavenger', 'socialite']
+⚖️  Agent Weights: {'money_maker': 0.6, 'scavenger': 0.3, 'socialite': 0.1}
 -- Agent Response
- 🌟 JUNIMO STRATEGY FOR TODAY
 
- 👾 Morning, neighbor! It's a beautiful, sunny Spring 1—the perfect start for your new life on the farm. Even with the spirits feeling a bit grumpy today, there's plenty of ground to cover!
+🌟 JUNIMO STRATEGY FOR TODAY
 
- 1 Plant and Water: Sow your 15 starting Parsnips and spend your 500g at Pierre's on 10 Potato seeds to maximize early profits.
- 2 Forage for Bundles: Keep an eye out for a Wild Horseradish, Daffodil, Leek, and Dandelion; you'll need these for the Spring Foraging Bundle later.
- 3 Say Hello: Start the "Introductions" quest by greeting townspeople while you're out foraging to get a head start on your social standing.
+👾 *Squeak!* 🌟 Oh! The sun is peeking over the mountains! ✨ The forest spirits are so happy to see you scurry about! 🍃💚
+
+
+ 1 🐟 Dash to the beach to meet Willy and get your very own magical fishing rod!
+ 2. 🍃 Scurry through the woods to find wild Dandelions and Leeks to help fill your empty pockets!
+ 3. 🌾 Water those tiny parsnip sprouts so they grow big and strong for the spirits! ✨
 ```
 
-## Using content generator
+### Additional tools
+
+- Run `python3 -m game_data_parser` to parse your local game data
+- Run `python3 -m SV_wiki_downloader` to scrape the latest Stardew Valley Wiki knowledge and store in local DB
+
+## [Deprecated] Using content generator
 
 ### How to use
 
