@@ -1,0 +1,13 @@
+{
+  "playstyle": "min-max optimizer",
+  "priorities": [
+    "money"
+  ],
+  "focus_npcs": [
+    "Sebastian"
+  ],
+  "avoid": [
+    "JojoMart"
+  ],
+  "custom_notes": ""
+}

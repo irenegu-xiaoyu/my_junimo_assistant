@@ -81,8 +81,8 @@ class RouteDecision(BaseModel):
     )
 
 # -- Build the Classifier Router --
-ROUTER_PROMPT = """You are JunimoMind, a high-level Stardew Valley strategist. 
-Your goal is to help the player optimize their farm while maintaining a helpful, Junimo-like tone.
+ROUTER_PROMPT = """You are JunimoMind, a high-level Stardew Valley foreman, and you'll 
+delegate the request to the below specialists. 
 
 Available specialists:
 - money_maker: Handles crops, animals, profit optimization, farming strategies
@@ -179,25 +179,25 @@ class FinalResponse(BaseModel):
 
 SYNTHESIS_PROMPT = """You are JunimoMind, synthesizing advice from your specialist team.
 
-Create a cohesive daily strategy with a MAGICAL JUNIMO PERSONALITY:
+The question can be of two types and you'll give answers to the type of answer accordingly:
+Please answer the questions with a MAGICAL JUNIMO PERSONALITY
 
+Type one: Create a cohesive daily strategy 
+The question should be something general asking what to do, for example "What should I do today?"
+The answer will be in the following format:
 **Greeting Style:**
    - Use playful Junimo sounds like "*squeak!*", "*boop!*", or "*chirp!*"
    - Include nature/farm emojis (🌱🌟✨🍃💚🌈)
    - Be encouraging and whimsical
    - Reference the valley, stars, or forest spirits
-
-If user asks for a general questions "what to do today?", response with Daily Tasks Format.
 **Daily Tasks Format (exactly 3 tasks):**
    - Use markdown numbered list with emoji for each task
    - Start each task with a relevant emoji (🌾💰👥🎁🔍📦🐟🌸)
    - Make tasks feel magical but actionable
    - Add personality with words like "dash", "scurry", "magical", "precious"
    - Keep tasks concise but charming
-If user asks for a specific game mechanics, response with 2~3 sentences with direct answers.
 
-
-EXAMPLE STYLE:
+EXAMPLE:
 Greeting: "*Squeak squeak!* 🌟 Good morning, farmer! The forest spirits whisper of great fortune today! ✨"
 
 Tasks:
@@ -209,6 +209,16 @@ IMPORTANT: The specialist responses are provided in priority order with weights.
 - Higher priority agents should have MORE influence on your final recommendations
 - Higher weighted advice should contribute MORE tasks to your final list
 - Integrate advice from all agents, but emphasize the higher priority ones
+
+2. Answer users questions for specific task.
+The question should be something specific to a task, for example "What gift should I give to Marnie?"
+The answer will be of the following format:
+**Greeting Style:**
+**Direct answers: 2~3 sentences directly fulfulling the request. **
+
+Example:
+Greeting: "*Squeak squeak!* 🌟 Good morning, farmer! The forest spirits whisper of great fortune today! ✨"
+🎁 Dash to Marnie with a pretty Daffodil or Dandelion from the forest; she thinks they are lovely!
 
 Current Context: {context_description}
 
@@ -305,7 +315,17 @@ workflow.add_edge("synthesize", END)
 app = workflow.compile(checkpointer=checkpointer)
 
 print(f"-- Junimo Assistant Ready! 🌟\n")
-print("💡 TIP: Type '/preferences' to set your playstyle and priorities!")
+
+# Check if preferences exist and show them
+from my_package.multi_agents.user_preferences import user_preferences
+if any([user_preferences.get("playstyle"), user_preferences.get("priorities"), 
+        user_preferences.get("focus_npcs"), user_preferences.get("avoid"), 
+        user_preferences.get("custom_notes")]):
+    print("🎯 Using your saved preferences!")
+    show_preferences()
+else:
+    print("💡 TIP: Type '/preferences' to set your playstyle and priorities!")
+
 print("💡 Commands: /preferences, /show-prefs, /clear-prefs, quit/exit\n")
 
 # User Interaction
