@@ -18,6 +18,9 @@ Agent Roles
 2. In your venv, run `pip install -e .`
 3. Config your Gemini API key, LangSmith key in a new `.env` file, see `.env.example`
 4. In project root, run `python3 -m my_package.multi_agents.the_foreman`
+5. In the prompt `🌱 What would you like to know? (type 'quit' or 'exit' to stop):` type your question, such as "What to do today?" or "What gift should I give to Marnie today?"
+6. You can input your preferences following the prompt!
+7. Happy farming!
 
 ### Example output
 

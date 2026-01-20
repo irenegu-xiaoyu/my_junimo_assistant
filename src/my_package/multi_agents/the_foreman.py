@@ -5,6 +5,7 @@ from my_package.utils.load_env_config import load_env_config
 from my_package.utils.tool_functions import get_farm_status, search_wiki, handle_tool_errors
 from my_package.multi_agents.agent_state import AgentState
 from my_package.multi_agents.priority_system import determine_priority_context, get_prioritized_responses
+from my_package.multi_agents.user_preferences import get_preference_prompt, show_preferences, clear_preferences, handle_preferences_command
 from langgraph.checkpoint.memory import InMemorySaver
 from langchain.agents.structured_output import ToolStrategy
 from pydantic import BaseModel, Field
@@ -19,7 +20,6 @@ from dotenv import load_dotenv
 
 checkpointer = InMemorySaver()
 
-
 print(f"-- Loading AI model config and game data")
 config = load_env_config()
 
@@ -31,11 +31,11 @@ model = ChatGoogleGenerativeAI(
     timeout = 120000,
     max_retries=2,
 )
-
 tools = [get_farm_status, search_wiki]
 middleware = [handle_tool_errors]
 
-# -- Define the Specialists --
+USER_PREFERENCE_PROMPT = get_preference_prompt()
+
 money_maker_agent = create_agent(
     model=model, 
     tools=tools,
@@ -46,8 +46,8 @@ money_maker_agent = create_agent(
     - Raising and selling animal products. 
     - Fishing.
     - Maximize profit per tile.
-    - Give specific advice on which crop seeds to buy and grow, which animals to buy.  
-    """,
+    - Give specific advice on which crop seeds to buy and grow, which animals to buy."""
+    + USER_PREFERENCE_PROMPT,
 )
 
 socialite_agent = create_agent(
@@ -57,8 +57,7 @@ socialite_agent = create_agent(
     system_prompt="""You are the Socialite specialist. Things to plan are:
     - Increase NPC hearts, 
     - Gift giving on NPC birthdays
-    - Attend festivals.
-    """,
+    - Attend festivals.""" + USER_PREFERENCE_PROMPT,
 )
 
 scavenger_agent = create_agent(
@@ -67,8 +66,7 @@ scavenger_agent = create_agent(
     middleware=middleware,
     system_prompt="""You are the Scavenger specialist. Things to plan are:
     - Collecting Community Center Bundles 
-    - Finish active quests items.
-    """,
+    - Finish active quests items.""" + USER_PREFERENCE_PROMPT,
 )
 
 
@@ -82,7 +80,7 @@ class RouteDecision(BaseModel):
         description="Brief explanation of why these agents were chosen"
     )
 
-# -- Build the Supervisor Router --
+# -- Build the Classifier Router --
 ROUTER_PROMPT = """You are JunimoMind, a high-level Stardew Valley strategist. 
 Your goal is to help the player optimize their farm while maintaining a helpful, Junimo-like tone.
 
@@ -307,8 +305,10 @@ workflow.add_edge("synthesize", END)
 app = workflow.compile(checkpointer=checkpointer)
 
 print(f"-- Junimo Assistant Ready! 🌟\n")
+print("💡 TIP: Type '/preferences' to set your playstyle and priorities!")
+print("💡 Commands: /preferences, /show-prefs, /clear-prefs, quit/exit\n")
 
-# Human-in-the-loop interaction
+# User Interaction
 while True:
     print("=" * 60)
     user_input = input("🌱 What would you like to know? (type 'quit' or 'exit' to stop): ").strip()
@@ -321,17 +321,25 @@ while True:
         print("⚠️  Please enter a question or request!\n")
         continue
     
+    # Handle special commands
+    if user_input.lower() == "/preferences":
+        handle_preferences_command()
+        continue
+    
+    if user_input.lower() == "/show-prefs":
+        show_preferences()
+        continue
+    
+    if user_input.lower() == "/clear-prefs":
+        clear_preferences()
+        continue
+    
     print(f"\n-- Start reasoning")
     
-    # Run the workflow
+    # Run the workflow - checkpointer automatically manages conversation history
+    # The thread_id persists state across invocations
     result = app.invoke(
-        {
-            "messages": [HumanMessage(content=user_input)],
-            "specialist_responses": {},
-            "next_agents": [],
-            "final_response": None,
-            "farm_status": {}
-        },
+        {"messages": [HumanMessage(content=user_input)]},
         config={"configurable": {"thread_id": "junimo_1"}}
     )
     
